@@ -1,44 +1,28 @@
 #include <iostream>
 using namespace std;
-#include <map>
 
-template <class T>
-struct _DISJOINTSET {
-    T _st;//起点
-    T _ed;//终点
-    map<T, T> ds;//并查集
-    map<T, int> ranks;
- 
-    _DISJOINTSET() : _st(0), _ed(0) {}
-    _DISJOINTSET(T *st, int n) {
-        init(st, n);
-    }
- 
-    /*
-    st 表示起点
-    ed 表示终点
-    */
-    void init(T *st, int n) {
-        // if (ed<st) {
-        //     return;
-        // }
-        for (int i = 0; i < n; i ++) {
-            ds[st[i]] = st[i];
-            ranks[st[i]]=0;
+struct DisjointSet{
+    int n;
+    int *ds;
+    int *ranks;
+
+    DisjointSet(int n){
+        this->n = n;
+        this->ds = new int[n];
+        this->ranks = new int[n];
+        for(int i = 0; i < n; i ++){
+            ds[i] = i;
+            ranks[i] = 0;
         }
-        _st = st[0];
-        _ed = st[n - 1];
     }
- 
-    //查找x的父亲
-    T find_root(T x) {
+
+    int find_root(int x) {
         return x==ds[x]?x:ds[x]=find_root(ds[x]);
     }
- 
-    //建立关系
-    void union_set(T x, T y) {
-        T x_root=find_root(x);
-        T y_root=find_root(y);
+
+    void union_set(int x, int y) {
+        int x_root=find_root(x);
+        int y_root=find_root(y);
         if (x_root!=y_root) {
             if (ranks[x_root]>ranks[y_root]) {
                 ds[y_root]=x_root;
@@ -50,106 +34,223 @@ struct _DISJOINTSET {
             }
         }
     }
- 
-    //查找x和y是否在同一个父亲
-    bool relation(T x, T y) {
+
+    bool relation(int x, int y) {
         return find_root(x)==find_root(y);
     }
+
 };
 
-struct junc{
-    int index;
-    int val;
-    // bool operator <(junc& a){
-    //     return a.index < this->index;
-    // }
-    bool operator ==(junc& a){
-        return a.index == this->index;
-    }
-    bool operator !=(junc& a){
-        return a.index != this->index;
-    }
-};
-
-bool find(junc *price, int n, int a, int b, int *result, int flag=0){
-    _DISJOINTSET<junc> *set0 = new _DISJOINTSET<junc>(price, n);
-    _DISJOINTSET<junc> *set1 = new _DISJOINTSET<junc>(price, n);
-    for(int i = 0; i < n; i ++){
-        if(set0->find_root(price[i]) == price[i] || set1->find_root(price[i]) == price[i]){
-            for(int j = i + 1; j < n; j ++){
-                if(price[i].val + price[j].val == a){
-                    set0->union_set(price[i], price[j]);
-                }
-                else if(price[i].val + price[j].val == b){
-                    set1->union_set(price[i], price[j]);
-                }
-            }
-        }
-    }
-    int index = 0;
-    for(int i = 0; i < n; i ++){
-        if(set0->ranks[price[i]] == 0 && set1->ranks[price[i]] == 0){
-            if(price[i].val*2 != a && price[i].val*2 != b){
-                return false;
-            }
-            if(price[i].val*2 == a){
-                result[price[i].index] = 0;
-                if(flag == 1){
-                    result[price[i].index] = 1 - result[price[i].index];
-                }
-            }
-            if(price[i].val*2 == b){
-                result[price[i].index] = 1;
-                if(flag == 1){
-                    result[price[i].index] = 1 - result[price[i].index];
-                }
-            }
-        }
-        else if(set0->ranks[price[i]] != 0 && set1->ranks[price[i]] == 0){
-            result[price[i].index] = 0;
-            if(flag == 1){
-                    result[price[i].index] = 1 - result[price[i].index];
-                }
-        }
-        else if(set0->ranks[price[i]] == 0 && set1->ranks[price[i]] != 0){
-            result[price[i].index] = 1;
-            if(flag == 1){
-                    result[price[i].index] = 1 - result[price[i].index];
-                }
-        }
-        else{
-            price[index] = price[i];
-            index ++;
-        }
-    }
-    if(index != 0){
-        return find(price, index, a, b, result, 1 - flag);
-    }
-    return true;
-}
 
 int main(){
-    int n, a, b;
-    cin >> n >> a >> b;
-    junc price[n];
+    int n, k;
+    cin >> n >> k;
+    DisjointSet *set = new DisjointSet(n);
+    int record[n];
     for(int i = 0; i < n; i ++){
-        price[i].index = i;
-        cin >> price[i].val;
+        record[i] = -1;
     }
-    int result[n];
-    bool ret = find(price, n, a, b, result);
-    if(!ret)
-        cout << "0" << endl;
-    else{
-        cout << "1" << endl;
-        for(int i = 0; i < n; i++){
-            cout << result[i];
-            if(i < n - 1)
-                cout << " ";
+    int sum = 0;
+    for(int i = 0; i < k; i ++){
+        int x, y;
+        cin >> x >> y;
+        x --;
+        y --;
+        if(x == y){ // condition 3
+            sum ++;
+            continue;
+        }
+        if(x > n - 1 || y > n - 1){ // condition 2
+            sum ++;
+            continue;
+        }
+        // condition 1
+        if(!set->relation(x, y)){
+            if(record[x] == -1 && record[y] == -1){ // never meet x and y before
+                record[x] = 1;
+                record[y] = 0;	
+            }
+            else if(record[x] != -1 && record[y] == -1){ // meet x only
+                record[y] = (record[x] + 2) % 3;
+            }
+            else if(record[y] != -1 && record[x] == -1){ // meet y only
+                record[x] = (record[y] + 1) % 3;
+            }
+            else{ // meet x and y both before, change y(x also right)
+                int root = set->find_root(y);
+                int gap = record[y] - (record[x] + 2) % 3;
+                for(int i = 0; i < n; i ++){ // 这里复杂度太高，不用并查集，换双向链表可以降复杂度，即可解决问题
+                    if(set->find_root(i) == root){
+                        record[i] = (record[i] - gap) % 3;
+                        if(record[i] < 0) record[i] += 3;
+                    }
+                }
+            }
+            set->union_set(x, y);
+        }
+        else{ 
+            if(record[y] != (record[x] + 2) % 3){
+                sum ++;
+            }
         }
     }
-
+    cout << sum << endl;
 }
+
+
+//----------------------------------------------------------------B
+// #include <map>
+
+// template <class T>
+// struct _DISJOINTSET {
+//     T _st;//起点
+//     T _ed;//终点
+//     map<T, T> ds;//并查集
+//     map<T, int> ranks;
+ 
+//     _DISJOINTSET() : _st(0), _ed(0) {}
+//     _DISJOINTSET(T st, T ed) {
+//         init(st, ed);
+//     }
+ 
+//     /*
+//     st 表示起点
+//     ed 表示终点
+//     */
+
+//     void init(T st, T ed) {
+//         if (ed<st) {
+//             return;
+//         }
+//         for (T i=st; i<=ed; i++) {
+//             ds[i]=i;
+//             ranks[i]=0;
+//         }
+//         _st = st;
+//         _ed = ed;
+//     }
+ 
+//     //查找x的父亲
+//     T find_root(T x) {
+//         return x==ds[x]?x:ds[x]=find_root(ds[x]);
+//     }
+ 
+//     //建立关系
+//     void union_set(T x, T y) {
+//         T x_root=find_root(x);
+//         T y_root=find_root(y);
+//         if (x_root!=y_root) {
+//             if (ranks[x_root]>ranks[y_root]) {
+//                 ds[y_root]=x_root;
+//             } else if (ranks[x_root]<ranks[y_root]) {
+//                 ds[x_root]=y_root;
+//             } else {
+//                 ds[x_root]=y_root;
+//                 ranks[y_root]++;
+//             }
+//         }
+//     }
+ 
+//     //查找x和y是否在同一个父亲
+//     bool relation(T x, T y) {
+//         return find_root(x)==find_root(y);
+//     }
+// };
+
+
+// bool find(map<int, int> reflect, int *arr, int n, int a, int b, int *result){
+//     _DISJOINTSET<int> *set0 = new _DISJOINTSET<int>(0, n);
+//     _DISJOINTSET<int> *set1 = new _DISJOINTSET<int>(0, n);
+//     map<int, int>::iterator it;
+//     for(int i = 0; i < n; i ++){
+//         int pa = a - arr[i];
+//         int pb = b - arr[i];
+//         it = reflect.find(pa);
+//         if(it != reflect.end()){
+//             set0->union_set(i, it->second);
+//         }
+//         it = reflect.find(pb);
+//         if(it != reflect.end()){
+//             set1->union_set(i, it->second);
+//         }
+//     }
+//     int flag = 1;
+//     while(flag == 1){
+//         flag = 0;
+//         for(int i = 0; i < n; i ++){
+//             if(result[i] != -1)
+//                 continue;
+//             if((set0->ds[i] != i || set0->ranks[i] != 0) && (set1->ds[i] == i && set1->ranks[i] == 0)){
+//                 result[i] = 0;
+//                 int another = reflect.find(a - arr[i])->second;
+//                 result[another] = 0;
+//                 it = reflect.find(b - arr[another]);
+//                 if(it != reflect.end()){
+//                     int another_pair = it->second;
+//                     set1->ds[another_pair] = another_pair;
+//                     set1->ranks[another_pair] = 0; 
+//                 }
+//                 flag = 1;
+//             }
+//             else if((set1->ds[i] != i || set1->ranks[i] != 0) && (set0->ds[i] == i && set0->ranks[i] == 0)){
+//                 result[i] = 1;
+//                 int another = reflect.find(b - arr[i])->second;
+//                 result[another] = 1;
+//                 it = reflect.find(a - arr[another]);
+//                 if(it != reflect.end()){
+//                     int another_pair = it->second;
+//                     set0->ds[another_pair] = another_pair;
+//                     set0->ranks[another_pair] = 0; 
+//                 }
+//                 flag = 1;
+//             }
+//             else if((set1->ds[i] == i || set1->ranks[i] == 0) && (set0->ds[i] == i && set0->ranks[i] == 0)){
+//                 if(arr[i] *2 != a && arr[i] *2 != b){
+//                     return false;
+//                 }
+//                 else if(arr[i] *2 == a){
+//                     result[i] = 0;
+//                 }
+//                 else {
+//                     result[i] = 1;
+//                 }
+//                 flag = 1;
+//             }
+//             else{
+//                 continue;
+//             }
+//         }
+//     }
+//     return true;
+// }
+
+
+// int main(){
+//     int n, a, b;
+//     cin >> n >> a >> b;
+//     map<int, int> reflection;
+//     int arr[n];
+//     int result[n];
+//     for(int i = 0; i < n; i ++){
+//         result[i] = -1;
+//         int x;
+//         cin >> x;
+//         arr[i] = x;
+//         reflection[x] = i;
+//     }
+//     bool ret = find(reflection, arr, n, a, b, result);
+//     if(!ret)
+//         cout << "0" << endl;
+//     else{
+//         cout << "1" << endl;
+//         for(int i = 0; i < n; i++){
+//             cout << result[i];
+//             if(i < n - 1)
+//                 cout << " ";
+//         }
+//     }
+
+// }
 
 
 
