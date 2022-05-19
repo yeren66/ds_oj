@@ -64,11 +64,11 @@ void quick_sort(int *array, int start, int end){
     }
 }
 
-int helper(int *slave, int n, int target){
-    int number = 1;
+int helper(int *slave, int start, int n, int target){
+    int number = start + 1;
     int gap = 0;
     int position = n - 1;
-    for(int i=1; i<n; i++){
+    for(int i=start + 1; i<n; i++){
         if(slave[i] == slave[i - 1])
             number ++;
         else{
@@ -85,10 +85,7 @@ int helper(int *slave, int n, int target){
         return slave[position] + gap - temp_;  
     }
     else{
-        for(int i = 0; i < number; i ++){
-            slave[i] = slave[position];
-        }
-        return helper(slave, n, target - number * gap);
+        return helper(slave, position, n, target - number * gap);
     }
 }
 
@@ -100,7 +97,7 @@ int main(){
         cin >> slave[i];
     }
     quick_sort(slave, 0, n - 1);
-    cout << helper(slave, n, m) << endl;
+    cout << helper(slave, 0, n, m) << endl;
 
 }
 
