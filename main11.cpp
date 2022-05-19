@@ -1,5 +1,6 @@
 #include <iostream>
 using namespace std;
+#include <random>
 
 
 // ----------------------------------------------------------------C
@@ -91,11 +92,16 @@ int helper(int *slave, int start, int n, int target){
 
 int main(){
     int n, m;
-    cin >> n >> m;
+    // cin >> n >> m;
+    n = rand()%10000;
+    m = rand()%10000000;
+    cout << n << ' ' << m << endl;
     int slave[n];
     for(int i = 0; i < n; i ++){
-        cin >> slave[i];
+        slave[i] = rand()%10000000;
+        cout << slave[i] << ' ';
     }
+    cout << endl;
     quick_sort(slave, 0, n - 1);
     cout << helper(slave, 0, n, m) << endl;
 
