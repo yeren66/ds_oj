@@ -10,7 +10,7 @@ void quick_sort(int *array, int start, int end){
         int pat = array[end];
         int index = start;
         for(int i = start; i < end; i++){
-            if(array[i] <= pat){
+            if(array[i] >= pat){
                 int temp = array[i];
                 array[i] = array[index];
                 array[index] = temp;
