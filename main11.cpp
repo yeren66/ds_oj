@@ -90,20 +90,101 @@ int helper(int *slave, int start, int n, int target){
     }
 }
 
+int N;
+int M;
+int* v;
+int partition(int* arr, int left, int right){
+	int a = arr[right];
+	int i, j;
+	for(i = left - 1, j = i + 1; j <= right; j ++){
+		if(arr[j] <= a){
+			i ++;
+			int temp = arr[i];
+			arr[i] = arr[j];
+			arr[j] = temp;
+		}
+	}
+	return i;
+}
+void QuickSort(int* arr, int left, int right){
+	if(left >= right){
+		return;
+	}
+	int p = partition(arr, left, right);
+	QuickSort(arr, left, p - 1);
+	QuickSort(arr, p + 1, right);
+}
+int solution(){
+	QuickSort(v, 0, N - 1);
+	int x = v[N / 2];
+	while(1){
+		int z = 0;
+		int count = 0;
+		for(int i = 0; i < N; i ++){
+			if(v[i] - x > 0){
+				z += (v[i] - x);
+				count ++;
+			}
+		}
+		int gap = z - M;
+		int y;
+		if(gap >= 0)
+			y = x + gap / count;
+		else{
+			y = x + gap / N;
+			if(y == x)
+				y = y - 1;
+		}
+	// cout << " gap : " << gap << " v : " << x << " v_next : " << y << endl;
+		if(x == y)
+			break;
+		else
+			x = y;
+	}
+	return x;
+}
+// int main(){
+// 	cin >> N >> M;
+// 	v = new int[N];
+// 	for(int i = 0; i < N; i ++){
+// 		cin >> v[i];
+// 	}
+// 	cout << solution() << endl;
+// }
+
 int main(){
     int n, m;
     // cin >> n >> m;
-    n = rand()%10000;
-    m = rand()%10000000;
-    cout << n << ' ' << m << endl;
-    int slave[n];
-    for(int i = 0; i < n; i ++){
-        slave[i] = rand()%10000000;
-        cout << slave[i] << ' ';
+    for(int i = 300; i < 10000; i ++){
+        n = i;
+        n ++;
+        N = n;
+        m = rand()%10000000;
+        M = m;
+        // cout << i << ':' << n << ' ' << m << endl;
+        int slave[n];
+        v = new int[N];
+        for(int i = 0; i < n; i ++){
+            slave[i] = rand()%10000000;
+            v[i] = slave[i];
+            // cout << slave[i] << ' ';
+        }
+        cout << endl;
+        quick_sort(slave, 0, n - 1);
+        int result1 = helper(slave, 0, n, m);
+        int result2 = solution();
+        if (result1 != result2){
+            cout << i << ':' << n << ' ' << m << endl;
+            // for(int i = 0; i < n; i ++){
+            //     cout << slave[i] << ' ';
+            // }
+            // cout << endl;
+            cout << "result1 = " << result1 << endl;
+            cout << "result2 = " << result2 << endl;
+            
+        }
+
     }
-    cout << endl;
-    quick_sort(slave, 0, n - 1);
-    cout << helper(slave, 0, n, m) << endl;
 
 }
 
