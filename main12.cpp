@@ -71,11 +71,11 @@ int main(){
     int n;
     cin >> n;
     int links[n];
-    int record[3 * n];
+    long long int record[3 * n];
     for(int i = 0; i < n; i ++){
         links[i] = 0;
     }
-    int total = 0;
+    long long int total = 0;
     for(int i = 0; i < n - 1; i ++){
         int u, v, w;
         cin >> u >> v >> w;
