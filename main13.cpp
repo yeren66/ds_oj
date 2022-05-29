@@ -1,20 +1,24 @@
 #include <iostream>
 using namespace std;
 
-
-int get_index(int *a, int number){
-    return number == a[number] ? number : a[number] = get_index(a, a[number]);
-}
+#define maxV 10000001
 
 int main(){
     int n, m, s, e;
     cin >> n >> m >> s >> e;
-    int country[n][3];
-    int links[n];
+    int country[n][n];
     for(int i = 0; i < n; i ++){
-        links[i] = i;
+        for(int j = 0; j < n; j ++){
+            if(i == j){
+                country[i][j] = 0;
+            }
+            else
+                country[i][j] = maxV;
+        }
     }
-    int index = 0;
+    bool S[n];     // S用来判断各点与起点之间是否有道路连通
+    int record[n]; // record用来存放起点s距各点的距离
+    int path[n];   // path用来记录各点到起点的路径
     for(int i = 0; i < m; i ++){
         int p;
         cin >> p;
@@ -25,10 +29,43 @@ int main(){
         }
         for(int j = 0; j < p - 1; j ++){
             cin >> value[j];
-            country[index][0] = value[j];
-            country[index][1] = temp[j];
-            country[index][2] = temp[j + 1];
+            country[temp[j]][temp[j + 1]] = value[j];
+            country[temp[j + 1]][temp[j]] = value[j];
         }
+    }
+    // 采用Dijkstra算法
+    for(int i = 0; i < n; i ++){
+        record[i] = country[s][i]; // 用起点到各点的直接距离初始化record数组
+        S[i] = false;
+        if(i != s && record[i] < maxV)
+            path[i] = s;           // 如果record有值则说明该点与起点有路径相连
+        else
+            path[i] = -1;          // 否则说明目前并无路径相连
+    }
+    S[s] = true;
+    int min;
+    for(int i = 0; i < n; i ++){
+        min = maxV;
+        int u = s;
+        for(int j = 0; j < n; j ++){ // 从剩余节点中找出离目前连通集合最短的点u
+            if(S[j] == false && record[j] < min){
+                u = j; min = record[j];
+            }
+        }
+        S[u] = true;
+        for(int j = 0; j < n; j ++){ // 比较加入点u后剩余节点与集合间点最短距离有无变化，用最小值替换
+            int w = country[u][j];
+            if(S[j] == false && w < maxV && record[u] + w < record[j]){
+                record[j] = record[u] + w;
+                path[j] = u;
+            }
+        }
+    }
+    if(record[e] == maxV){
+        cout << -1 << endl;
+    }
+    else{
+        cout << record[e] << endl;
     }
 }
 
@@ -266,22 +303,31 @@ int main(){
 //     for(int i = 0; i < n; i ++){
 //         cin >> array[i];
 //     }
+//     // 分别建立最大堆与最小堆
 //     maxHeap *maxheap = new maxHeap(n);
 //     minHeap *minheap = new class minHeap(n);
 //     int t = 0, tt = 0;
+//     // 最大堆的堆顶永远是第[x/m]大的数
+//     // 最小堆用来存放目前大于第[x/m]大的数
+//     
 //     for(int i = 0; i < n; i ++){
+//         // 每经过[x/m]次循环，都将最大堆的堆顶拿出存入最小堆
 //         if(tt == 1 && i % m == 0){
 //             minheap->add(maxheap->output());
 //             maxheap->pop();
 //             t = 1;
 //         }
 //         if(t == 1 && array[i] > minheap->output()){
+//             // 新来的数先和最小堆比较，如果大于最小堆的堆顶
+//             // 则将最小堆的堆顶拿出存入最大堆，新来的数放入最小堆
 //             minheap->add(array[i]);
 //             maxheap->add(minheap->output());
 //             minheap->pop();
 //         }
 //         else
+//             // 否则将新来的数放入最大堆
 //             maxheap->add(array[i]);
+//         // 每次都输出最大堆的堆顶
 //         cout << maxheap->output() << " ";
 //         tt = 1;
 //     }
